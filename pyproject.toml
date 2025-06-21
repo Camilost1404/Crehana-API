@@ -1,0 +1,33 @@
+[project]
+name = "crehana-api"
+version = "0.1.0"
+description = "Desafío Técnico Backend Crehana"
+authors = [
+    {name = "Andrés Torres",email = "camitorres1404@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard] (>=0.115.13,<0.116.0)",
+    "pre-commit (>=4.2.0,<5.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+include = '\.pyi?$'
+
+[tool.isort]
+line_length = 88
+profile = "black"
+combine_as_imports = true
+include_trailing_comma = true

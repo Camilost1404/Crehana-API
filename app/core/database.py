@@ -24,5 +24,8 @@ def init_db():
     Initialize the database by creating all tables.
     This should be called at application startup.
     """
-    # TODO: Import your models here to ensure they are registered with SQLModel
+    # Import all models to ensure they are registered with SQLModel
+    from app.domain.entities.board import Board  # noqa: F401
+    from app.domain.entities.task import Task  # noqa: F401
+
     SQLModel.metadata.create_all(engine)

@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from fastapi.responses import RedirectResponse
 
+from app.core.api import api_router
 from app.core.constants import (
     APP_VERSION,
     CONTACT,
@@ -39,6 +40,9 @@ app = FastAPI(
     swagger_favicon_url=SWAGGER_FAVICON_URL,
     lifespan=lifespan,
 )
+
+
+app.include_router(api_router)
 
 
 @app.get("/", include_in_schema=False, response_class=RedirectResponse)

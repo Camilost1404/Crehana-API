@@ -17,7 +17,6 @@ class UserBase(SQLModel):
     first_name: Optional[str] = Field(default=None, max_length=50)
     last_name: Optional[str] = Field(default=None, max_length=50)
     email: EmailStr = Field(max_length=100, nullable=False)
-    is_active: bool = Field(default=True, nullable=False)
 
 
 class User(UserBase, table=True):
@@ -28,10 +27,11 @@ class User(UserBase, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     password: str = Field(max_length=128, nullable=False)
+    is_active: bool = Field(default=True, nullable=False)
     created_at: datetime = Field(default_factory=get_current_utc_time)
-    updated_at: datetime = Field(
+    updated_at: Optional[datetime] = Field(
         sa_column_kwargs={"on_update": get_current_utc_time},
-        default_factory=get_current_utc_time,
+        default=None,
     )
     boards_admin: List["Board"] = Relationship(
         back_populates="admin", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
@@ -45,3 +45,24 @@ class User(UserBase, table=True):
 class Token(SQLModel):
     access_token: str
     token_type: str
+
+
+class UserResponse(UserBase):
+    """
+    Data model for returning user information.
+    This model is used to return user details in API responses.
+    """
+
+    id: int
+    is_active: bool
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+
+class UserCreate(UserBase):
+    """
+    Data model for creating a new user.
+    This model is used when creating a new user in the system.
+    """
+
+    password: str

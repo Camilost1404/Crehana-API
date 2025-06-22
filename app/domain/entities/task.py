@@ -26,15 +26,16 @@ class Task(TaskBase, table=True):
     board: Optional["Board"] = Relationship(back_populates="tasks")
     board_id: Optional[int] = Field(default=None, foreign_key="board.id")
     created_at: datetime = Field(default_factory=get_current_utc_time)
-    updated_at: datetime = Field(
-        sa_column_kwargs={"on_update": get_current_utc_time},
-        default_factory=get_current_utc_time,
+    updated_at: Optional[datetime] = Field(
+        sa_column_kwargs={"on_update": get_current_utc_time}, default=None
     )
 
 
 class TaskResponse(TaskBase):
     id: int
     board_id: int
+    created_at: datetime
+    updated_at: Optional[datetime]
 
 
 class TaskCreate(TaskBase):

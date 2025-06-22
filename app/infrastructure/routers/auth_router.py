@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.application.services.auth_service import AuthService
 from app.core.constants import ACCESS_TOKEN_EXPIRE_MINUTES
-from app.domain.entities.user import Token
+from app.domain.entities.user import Token, UserCreate, UserResponse
 from app.infrastructure.dependencies import get_auth_service
 from app.utils.auth import create_access_token
 
@@ -36,8 +36,29 @@ async def login(
         )
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    # Assuming the AuthService has a method to create a token
+
     token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     return Token(access_token=token, token_type="bearer")
+
+
+@app.post(
+    "/register",
+    summary="User registration",
+    status_code=status.HTTP_201_CREATED,
+    response_model=UserResponse,
+)
+async def register(
+    user_data: UserCreate,
+    auth_service: Annotated["AuthService", Depends(get_auth_service)],
+) -> UserResponse:
+    """
+    Register a new user.
+    Returns the created user data.
+    """
+    try:
+        user = await auth_service.register_user(user_data)
+        return UserResponse.model_validate(user)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

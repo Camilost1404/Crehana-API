@@ -52,7 +52,7 @@ async def get_by_id(
         board = await board_service.get_by_id(board_id)
         return BoardWithTasks.model_validate(board)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @app.post(
@@ -90,7 +90,7 @@ async def update(
         board = await board_service.update(board_id, board_data)
         return BoardResponse.model_validate(board)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @app.delete(
@@ -106,7 +106,7 @@ async def delete(
     try:
         await board_service.delete(board_id)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @app.post(
@@ -127,4 +127,4 @@ async def add_task_to_board(
         task = await task_service.create(board_id, task_data)
         return TaskResponse.model_validate(task)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

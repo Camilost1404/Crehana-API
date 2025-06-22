@@ -25,7 +25,7 @@ async def get_by_id(
         task = await task_service.get_by_id(task_id)
         return TaskResponse.model_validate(task)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @app.patch(
@@ -45,7 +45,7 @@ async def update(
         task = await task_service.update(task_id, task_data)
         return TaskResponse.model_validate(task)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @app.delete(
@@ -63,4 +63,4 @@ async def delete(
     try:
         await task_service.delete(task_id)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

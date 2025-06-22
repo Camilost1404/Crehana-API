@@ -39,9 +39,9 @@ class Board(BoardBase, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=get_current_utc_time)
-    updated_at: datetime = Field(
+    updated_at: Optional[datetime] = Field(
         sa_column_kwargs={"on_update": get_current_utc_time},
-        default_factory=get_current_utc_time,
+        default=None,
     )
     tasks: List["Task"] = Relationship(
         back_populates="board", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
@@ -61,7 +61,7 @@ class BoardResponse(BoardBase):
 
     id: int
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime]
 
 
 class BoardPaginatedResponse(SQLModel):

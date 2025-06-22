@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
@@ -45,6 +45,15 @@ class User(UserBase, table=True):
 class Token(SQLModel):
     access_token: str
     token_type: str
+
+
+class TokenData(SQLModel):
+    """
+    Data model for token data.
+    This model is used to store information about the user associated with a token.
+    """
+
+    email: Union[EmailStr, None] = None
 
 
 class UserResponse(UserBase):

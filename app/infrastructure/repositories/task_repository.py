@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 
 from app.domain.entities.task import Task, TaskCreate, TaskUpdate
 from app.domain.repositories.task_repository import ITaskRepository

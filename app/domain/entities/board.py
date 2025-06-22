@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
-from app.domain.entities.task import Task
+from app.domain.entities.task import Task, TaskForBoardResponse
 from app.utils.datetime import get_current_utc_time
 
 
@@ -20,7 +20,7 @@ class Board(BoardBase, table=True):
     Represents a board in the system.
     """
 
-    id: int | None = Field(default=None, primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=get_current_utc_time)
     updated_at: datetime = Field(
         sa_column_kwargs={"on_update": get_current_utc_time},
@@ -63,8 +63,8 @@ class BoardUpdate(SQLModel):
     Data model for updating an existing board.
     """
 
-    id: int | None = None
-    name: str | None = None
+    id: Optional[int] = None
+    name: Optional[str] = None
 
 
 class BoardWithTasks(BoardResponse):
@@ -72,4 +72,4 @@ class BoardWithTasks(BoardResponse):
     Data model for returning a board with its tasks.
     """
 
-    tasks: List["Task"] = Field(default_factory=list)
+    tasks: List["TaskForBoardResponse"] = Field(default_factory=list)

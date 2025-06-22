@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.application.services.board_service import BoardService
-from app.core.dependencies import get_board_service
+from app.application.services.task_service import TaskService
+from app.core.dependencies import get_board_service, get_task_service
 from app.domain.entities.board import (
     BoardCreate,
     BoardPaginatedResponse,
@@ -11,6 +12,7 @@ from app.domain.entities.board import (
     BoardUpdate,
     BoardWithTasks,
 )
+from app.domain.entities.task import TaskCreate, TaskResponse
 
 app = APIRouter()
 
@@ -101,4 +103,28 @@ async def delete(
     """
     Delete a board by its ID.
     """
-    await board_service.delete(board_id)
+    try:
+        await board_service.delete(board_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.post(
+    "/{board_id}/tasks",
+    response_model=TaskResponse,
+    summary="Add a task to a board",
+    status_code=status.HTTP_201_CREATED,
+)
+async def add_task_to_board(
+    board_id: str,
+    task_data: TaskCreate,
+    task_service: Annotated[TaskService, Depends(get_task_service)],
+) -> TaskResponse:
+    """
+    Add a task to a specific board.
+    """
+    try:
+        task = await task_service.create(board_id, task_data)
+        return TaskResponse.model_validate(task)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

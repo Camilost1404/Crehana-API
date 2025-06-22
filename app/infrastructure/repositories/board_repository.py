@@ -32,7 +32,7 @@ class BoardRepository(IBoardRepository):
         """
         board = self.db_session.get(Board, board_id)
         if not board:
-            return None
+            raise ValueError(f"Board with ID {board_id} not found.")
         return board
 
     async def create(self, board_data: BoardCreate) -> "Board":
@@ -52,7 +52,7 @@ class BoardRepository(IBoardRepository):
         existing_board = self.db_session.get(Board, board_id)
 
         if not existing_board:
-            return None
+            raise ValueError(f"Board with ID {board_id} not found.")
 
         board = board_data.model_dump(exclude_unset=True)
         existing_board.sqlmodel_update(board)
@@ -65,6 +65,10 @@ class BoardRepository(IBoardRepository):
         """
         Delete a board by its ID.
         """
-        existing_board = self.get_by_id(board_id)
+        existing_board = self.db_session.get(Board, board_id)
+
+        if not existing_board:
+            raise ValueError(f"Board with ID {board_id} not found.")
+
         self.db_session.delete(existing_board)
         self.db_session.commit()

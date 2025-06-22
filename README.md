@@ -39,11 +39,21 @@ Ensure you have the following installed on your system:
 5. **Ensure `.env` Variables**
     Create a `.env` file in the root of the project and ensure all required environment variables are properly set. Refer to the `.env.example` file for the expected variables.
 
+    Generate a secret key for the `.env` file using the following command:
+    ```bash
+    openssl rand -hex 32
+    ```
+
+````markdown
 6. **Build and Start the Docker Image**
     Run the following command to build the Docker image:
     ```bash
-    docker compose -f docker-compose.yml up --build
+    docker compose -f docker-compose.yml up --build --remove-orphans
     ```
+    or in detached mode:
+    ```bash
+    docker compose -f docker-compose.yml up -d --build --remove-orphans
+    ````
 
 7. **Access the Application**
     Once the containers are up and running, the application will be accessible at:

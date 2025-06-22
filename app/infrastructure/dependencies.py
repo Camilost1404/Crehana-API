@@ -30,7 +30,9 @@ async def get_task_service(
     db_session: Annotated[Session, Depends(get_db)],
 ) -> "TaskService":
     task_repository = TaskRepository(db_session)
-    return TaskService(task_repository)
+    board_repository = BoardRepository(db_session)
+    user_repository = UserRepository(db_session)
+    return TaskService(task_repository, board_repository, user_repository)
 
 
 async def get_auth_service(

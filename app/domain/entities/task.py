@@ -68,6 +68,7 @@ class Task(TaskBase, table=True):
 class TaskResponse(TaskBase):
     id: int
     board_id: int
+    asigned_user_id: Optional[int]
     created_at: datetime
     updated_at: Optional[datetime]
 
@@ -87,6 +88,14 @@ class TaskUpdate(SQLModel):
 
     title: Optional[str] = Field(default=None, max_length=100)
     description: Optional[str] = Field(default=None, max_length=500)
+    status: Optional[TaskStatus] = Field(
+        sa_column=Column(Enum(TaskStatus), nullable=False, default=TaskStatus.TODO)
+    )
+    priority: Optional[TaskPriority] = Field(
+        sa_column=Column(
+            Enum(TaskPriority), nullable=False, default=TaskPriority.MEDIUM
+        )
+    )
 
 
 class TaskForBoardResponse(TaskBase):
@@ -96,5 +105,6 @@ class TaskForBoardResponse(TaskBase):
     """
 
     id: int
+    asigned_user_id: Optional[int]
     created_at: datetime
     updated_at: Optional[datetime]

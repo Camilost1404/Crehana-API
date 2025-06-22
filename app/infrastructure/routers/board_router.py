@@ -165,12 +165,13 @@ async def add_task_to_board(
     board_id: str,
     task_data: TaskCreate,
     task_service: Annotated[TaskService, Depends(get_task_service)],
+    email: Annotated[str, Depends(get_current_user_email)],
 ) -> TaskResponse:
     """
     Add a task to a specific board.
     """
     try:
-        task = await task_service.create(board_id, task_data)
+        task = await task_service.create(board_id, task_data, email=email)
         return TaskResponse.model_validate(task)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

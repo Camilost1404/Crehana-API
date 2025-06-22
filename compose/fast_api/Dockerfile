@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     curl \
     vim \
     build-essential \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalar Poetry
@@ -34,6 +35,10 @@ ENV PYTHONUNBUFFERED=1 \
     APP_HOME=/app \
     FASTAPI_ENV=development
 
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copiar paquetes instalados de la etapa de build
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
@@ -42,9 +47,12 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY ./compose/fast_api/start.sh /start.sh
 RUN chmod +x /start.sh
 
+COPY ./compose/fast_api/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Copiar el resto de la app
 WORKDIR ${APP_HOME}
 COPY . .
 
 EXPOSE 8000
-CMD ["/start.sh"]
+ENTRYPOINT [ "/entrypoint.sh" ]

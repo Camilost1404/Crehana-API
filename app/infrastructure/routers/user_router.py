@@ -1,9 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.application.services.user_service import UserService
-from app.domain.entities.user import UserResponse
+from app.domain.entities.user import UserPaginatedResponse, UserResponse
 from app.infrastructure.dependencies import get_current_user_email, get_user_service
 
 app = APIRouter()
@@ -27,3 +27,21 @@ async def me(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+@app.get(
+    "/",
+    summary="Get users",
+    status_code=status.HTTP_200_OK,
+)
+async def get_users(
+    user_service: Annotated[UserService, Depends(get_user_service)],
+    offset: int = 0,
+    limit: int = Query(default=100, le=100),
+) -> UserPaginatedResponse:
+    """Retrieve all users."""
+    try:
+        users = await user_service.get_all(offset=offset, limit=limit)
+        return UserPaginatedResponse(**users)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

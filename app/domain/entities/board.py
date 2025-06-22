@@ -1,13 +1,11 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
 from app.domain.entities.task import Task, TaskForBoardResponse
+from app.domain.entities.user import User, UserBoardLink, UserResponse
 from app.utils.datetime import get_current_utc_time
-
-if TYPE_CHECKING:
-    from app.domain.entities.user import User  # noqa: F401
 
 
 class BoardBase(SQLModel):
@@ -16,20 +14,6 @@ class BoardBase(SQLModel):
     """
 
     name: str = Field(max_length=100, nullable=False)
-
-
-class UserBoardLink(SQLModel, table=True):
-    """
-    Link model for many-to-many relationship between User and Board.
-    This model allows users to be collaborators on boards.
-    """
-
-    user_id: Optional[int] = Field(
-        default=None, foreign_key="user.id", primary_key=True
-    )
-    board_id: Optional[int] = Field(
-        default=None, foreign_key="board.id", primary_key=True
-    )
 
 
 class Board(BoardBase, table=True):
@@ -46,12 +30,22 @@ class Board(BoardBase, table=True):
     tasks: List["Task"] = Relationship(
         back_populates="board", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
-    admin: Optional["User"] = Relationship(back_populates="boards_admin")
-    admin_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    admin: "User" = Relationship(back_populates="boards_admin")
+    admin_id: int = Field(default=None, foreign_key="user.id")
     collaborators: List["User"] = Relationship(
         back_populates="boards_collaborator",
         link_model=UserBoardLink,
     )
+
+    @property
+    def complete_percentage(self) -> float:
+        """
+        Calculate the percentage of completed tasks on the board.
+        """
+        if not self.tasks:
+            return 0.0
+        completed_tasks = sum(task.status == "DONE" for task in self.tasks)
+        return (completed_tasks / len(self.tasks)) * 100 if self.tasks else 0.0
 
 
 class BoardResponse(BoardBase):
@@ -62,6 +56,8 @@ class BoardResponse(BoardBase):
     id: int
     created_at: datetime
     updated_at: Optional[datetime]
+    complete_percentage: float
+    collaborators: List[UserResponse] = Field(default_factory=list)
 
 
 class BoardPaginatedResponse(SQLModel):
@@ -86,7 +82,6 @@ class BoardUpdate(SQLModel):
     Data model for updating an existing board.
     """
 
-    id: Optional[int] = None
     name: Optional[str] = None
 
 

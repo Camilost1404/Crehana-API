@@ -22,7 +22,8 @@ async def get_board_service(
     db_session: Annotated[Session, Depends(get_db)],
 ) -> BoardService:
     order_repository = BoardRepository(db_session)
-    return BoardService(order_repository)
+    user_repository = UserRepository(db_session)
+    return BoardService(order_repository, user_repository)
 
 
 async def get_task_service(

@@ -25,3 +25,11 @@ class UserService:
             raise ValueError("User is inactive.")
 
         return user
+
+    async def get_all(self, offset: int = 0, limit: int = 100) -> dict:
+        """
+        Retrieve all users with pagination.
+        """
+        users = await self.user_repository.get_all(offset=offset, limit=limit)
+        total = await self.user_repository.count()
+        return {"items": users, "total": total, "offset": offset, "limit": limit}

@@ -12,7 +12,11 @@ from app.domain.entities.board import (
     BoardWithTasks,
 )
 from app.domain.entities.task import TaskCreate, TaskResponse
-from app.infrastructure.dependencies import get_board_service, get_task_service
+from app.infrastructure.dependencies import (
+    get_board_service,
+    get_current_user_email,
+    get_task_service,
+)
 
 app = APIRouter()
 
@@ -25,13 +29,14 @@ app = APIRouter()
 )
 async def get_all(
     board_service: Annotated[BoardService, Depends(get_board_service)],
+    email: Annotated[str, Depends(get_current_user_email)],
     offset: int = 0,
     limit: int = Query(default=100, le=100),
 ) -> BoardPaginatedResponse:
     """
     Retrieve all boards.
     """
-    boards = await board_service.get_all(offset=offset, limit=limit)
+    boards = await board_service.get_all(offset=offset, limit=limit, email=email)
     return BoardPaginatedResponse(**boards)
 
 
@@ -44,12 +49,13 @@ async def get_all(
 async def get_by_id(
     board_id: str,
     board_service: Annotated[BoardService, Depends(get_board_service)],
+    email: Annotated[str, Depends(get_current_user_email)],
 ) -> BoardWithTasks:
     """
     Retrieve a board by its ID.
     """
     try:
-        board = await board_service.get_by_id(board_id)
+        board = await board_service.get_by_id(board_id, email=email)
         return BoardWithTasks.model_validate(board)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -64,12 +70,16 @@ async def get_by_id(
 async def create(
     board_data: BoardCreate,
     board_service: Annotated[BoardService, Depends(get_board_service)],
+    email: Annotated[str, Depends(get_current_user_email)],
 ) -> BoardResponse:
     """
     Create a new board.
     """
-    board = await board_service.create(board_data)
-    return BoardResponse.model_validate(board)
+    try:
+        board = await board_service.create(board_data, email)
+        return BoardResponse.model_validate(board)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @app.patch(
@@ -82,12 +92,13 @@ async def update(
     board_id: str,
     board_data: BoardUpdate,
     board_service: Annotated[BoardService, Depends(get_board_service)],
+    email: Annotated[str, Depends(get_current_user_email)],
 ) -> BoardResponse:
     """
     Update an existing board.
     """
     try:
-        board = await board_service.update(board_id, board_data)
+        board = await board_service.update(board_id, board_data, email=email)
         return BoardResponse.model_validate(board)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -99,12 +110,47 @@ async def update(
 async def delete(
     board_id: str,
     board_service: Annotated[BoardService, Depends(get_board_service)],
+    email: Annotated[str, Depends(get_current_user_email)],
 ) -> None:
     """
     Delete a board by its ID.
     """
     try:
-        await board_service.delete(board_id)
+        await board_service.delete(board_id, email=email)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.post(
+    "/{board_id}/collaborator/{user_id}",
+)
+async def add_collaborator(
+    board_id: str,
+    user_id: str,
+    board_service: Annotated[BoardService, Depends(get_board_service)],
+    email: Annotated[str, Depends(get_current_user_email)],
+) -> dict:
+    """Add a collaborator to a board by user ID."""
+    try:
+        await board_service.add_collaborator(board_id, user_id, email=email)
+        return {"detail": "Collaborator added successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.delete(
+    "/{board_id}/collaborator/{user_id}",
+)
+async def remove_collaborator(
+    board_id: str,
+    user_id: str,
+    board_service: Annotated[BoardService, Depends(get_board_service)],
+    email: Annotated[str, Depends(get_current_user_email)],
+) -> dict:
+    """Remove a collaborator from a board by user ID."""
+    try:
+        await board_service.remove_collaborator(board_id, user_id, email=email)
+        return {"detail": "Collaborator removed successfully"}
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 

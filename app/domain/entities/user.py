@@ -1,11 +1,28 @@
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 
-from app.domain.entities.board import Board, UserBoardLink
+from app.domain.entities.task import Task
 from app.utils.datetime import get_current_utc_time
+
+if TYPE_CHECKING:
+    from app.domain.entities.board import Board  # noqa: F401
+
+
+class UserBoardLink(SQLModel, table=True):
+    """
+    Link model for many-to-many relationship between User and Board.
+    This model allows users to be collaborators on boards.
+    """
+
+    user_id: Optional[int] = Field(
+        default=None, foreign_key="user.id", primary_key=True
+    )
+    board_id: Optional[int] = Field(
+        default=None, foreign_key="board.id", primary_key=True
+    )
 
 
 class UserBase(SQLModel):
@@ -40,6 +57,7 @@ class User(UserBase, table=True):
         back_populates="collaborators",
         link_model=UserBoardLink,
     )
+    tasks_assigned: List["Task"] = Relationship(back_populates="asigned_to")
 
 
 class Token(SQLModel):
@@ -75,3 +93,15 @@ class UserCreate(UserBase):
     """
 
     password: str
+
+
+class UserPaginatedResponse(SQLModel):
+    """
+    Data model for paginated user responses.
+    This model is used to return a list of users with pagination details.
+    """
+
+    items: List[UserResponse]
+    total: int = Field(default=0)
+    offset: int = Field(default=0)
+    limit: int = Field(default=100)

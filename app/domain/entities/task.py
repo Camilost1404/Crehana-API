@@ -88,14 +88,8 @@ class TaskUpdate(SQLModel):
 
     title: Optional[str] = Field(default=None, max_length=100)
     description: Optional[str] = Field(default=None, max_length=500)
-    status: Optional[TaskStatus] = Field(
-        sa_column=Column(Enum(TaskStatus), nullable=False, default=TaskStatus.TODO)
-    )
-    priority: Optional[TaskPriority] = Field(
-        sa_column=Column(
-            Enum(TaskPriority), nullable=False, default=TaskPriority.MEDIUM
-        )
-    )
+    status: Optional[TaskStatus] = Field(default=None)
+    priority: Optional[TaskPriority] = Field(default=None)
 
 
 class TaskForBoardResponse(TaskBase):

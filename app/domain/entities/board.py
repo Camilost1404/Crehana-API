@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
-from app.domain.entities.task import Task, TaskForBoardResponse
+from app.domain.entities.task import Task, TaskForBoardResponse, TaskStatus
 from app.domain.entities.user import User, UserBoardLink, UserResponse
 from app.utils.datetime import get_current_utc_time
 
@@ -44,7 +44,7 @@ class Board(BoardBase, table=True):
         """
         if not self.tasks:
             return 0.0
-        completed_tasks = sum(task.status == "DONE" for task in self.tasks)
+        completed_tasks = sum(task.status == TaskStatus.DONE for task in self.tasks)
         return (completed_tasks / len(self.tasks)) * 100 if self.tasks else 0.0
 
 

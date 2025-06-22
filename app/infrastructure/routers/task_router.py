@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.application.services.task_service import TaskService
-from app.core.dependencies import get_task_service
 from app.domain.entities.task import TaskResponse, TaskUpdate
+from app.infrastructure.dependencies import get_task_service
 
 app = APIRouter()
 

@@ -1,6 +1,9 @@
 from app.core.settings import settings
 
 APP_NAME = settings.app_name
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 TITLE = "Crehana API - Prueba Técnica"
 APP_VERSION = settings.app_version
 DESCRIPTION = """

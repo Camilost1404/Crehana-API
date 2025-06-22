@@ -1,10 +1,13 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
 from app.domain.entities.task import Task, TaskForBoardResponse
 from app.utils.datetime import get_current_utc_time
+
+if TYPE_CHECKING:
+    from app.domain.entities.user import User  # noqa: F401
 
 
 class BoardBase(SQLModel):
@@ -13,6 +16,20 @@ class BoardBase(SQLModel):
     """
 
     name: str = Field(max_length=100, nullable=False)
+
+
+class UserBoardLink(SQLModel, table=True):
+    """
+    Link model for many-to-many relationship between User and Board.
+    This model allows users to be collaborators on boards.
+    """
+
+    user_id: Optional[int] = Field(
+        default=None, foreign_key="user.id", primary_key=True
+    )
+    board_id: Optional[int] = Field(
+        default=None, foreign_key="board.id", primary_key=True
+    )
 
 
 class Board(BoardBase, table=True):
@@ -28,6 +45,12 @@ class Board(BoardBase, table=True):
     )
     tasks: List["Task"] = Relationship(
         back_populates="board", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+    admin: Optional["User"] = Relationship(back_populates="boards_admin")
+    admin_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    collaborators: List["User"] = Relationship(
+        back_populates="boards_collaborator",
+        link_model=UserBoardLink,
     )
 
 

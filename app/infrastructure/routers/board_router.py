@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.application.services.board_service import BoardService
 from app.application.services.task_service import TaskService
-from app.core.dependencies import get_board_service, get_task_service
 from app.domain.entities.board import (
     BoardCreate,
     BoardPaginatedResponse,
@@ -13,6 +12,7 @@ from app.domain.entities.board import (
     BoardWithTasks,
 )
 from app.domain.entities.task import TaskCreate, TaskResponse
+from app.infrastructure.dependencies import get_board_service, get_task_service
 
 app = APIRouter()
 

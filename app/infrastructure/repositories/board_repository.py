@@ -1,8 +1,10 @@
 from typing import List, Optional
 
+from sqlalchemy.orm import selectinload
 from sqlmodel import Session, func, select
 
 from app.domain.entities.board import Board, BoardCreate, BoardUpdate, UserBoardLink
+from app.domain.entities.task import TaskPriority, TaskStatus
 from app.domain.repositories.board_repository import IBoardRepository
 
 
@@ -31,17 +33,38 @@ class BoardRepository(IBoardRepository):
         return self.db_session.scalar(statement)
 
     async def get_by_id(
-        self, board_id: str, admin_id: Optional[int]
+        self,
+        board_id: str,
+        admin_id: Optional[int],
+        status: Optional[str] = None,
+        priority: Optional[str] = None,
     ) -> Optional["Board"]:
         """
         Retrieve a board by its ID.
         """
-        statement = select(Board).where(
-            Board.id == board_id, Board.admin_id == admin_id
+        statement = (
+            select(Board)
+            .options(selectinload(Board.tasks))
+            .where(Board.id == board_id, Board.admin_id == admin_id)
         )
+
         board = self.db_session.exec(statement).first()
         if not board:
             raise ValueError(f"Board with ID {board_id} not found.")
+
+        if status:
+            try:
+                status_enum = TaskStatus(status)  # Asegúrate de convertir al Enum
+            except ValueError:
+                raise ValueError(f"Invalid status: {status}")
+            board.tasks = [t for t in board.tasks if t.status == status_enum]
+        if priority:
+            try:
+                priority_enum = TaskPriority(priority)  # Asegúrate de convertir al Enum
+            except ValueError:
+                raise ValueError(f"Invalid priority: {priority}")
+            board.tasks = [t for t in board.tasks if t.priority == priority_enum]
+
         return board
 
     async def create(self, board_data: BoardCreate, admin_id: Optional[int]) -> "Board":

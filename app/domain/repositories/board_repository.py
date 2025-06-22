@@ -12,7 +12,11 @@ class IBoardRepository(ABC):
 
     @abstractmethod
     async def get_by_id(
-        self, board_id: str, admin_id: Optional[int]
+        self,
+        board_id: str,
+        admin_id: Optional[int],
+        status: Optional[str] = None,
+        priority: Optional[str] = None,
     ) -> Optional["Board"]:
         """Retrieve a board by its ID."""
 

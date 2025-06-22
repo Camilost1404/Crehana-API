@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -50,15 +50,19 @@ async def get_by_id(
     board_id: str,
     board_service: Annotated[BoardService, Depends(get_board_service)],
     email: Annotated[str, Depends(get_current_user_email)],
+    status_task: Optional[str] = Query(None, description="Filter tasks by status"),
+    priority_task: Optional[str] = Query(None, description="Filter tasks by priority"),
 ) -> BoardWithTasks:
     """
     Retrieve a board by its ID.
     """
     try:
-        board = await board_service.get_by_id(board_id, email=email)
+        board = await board_service.get_by_id(
+            board_id, email=email, status=status_task, priority=priority_task
+        )
         return BoardWithTasks.model_validate(board)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @app.post(

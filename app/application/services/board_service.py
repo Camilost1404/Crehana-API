@@ -27,14 +27,22 @@ class BoardService:
         total = await self.board_repository.count()
         return {"items": boards, "total": total, "offset": offset, "limit": limit}
 
-    async def get_by_id(self, board_id: str, email: str) -> Optional[Board]:
+    async def get_by_id(
+        self,
+        board_id: str,
+        email: str,
+        status: Optional[str] = None,
+        priority: Optional[str] = None,
+    ) -> Optional[Board]:
         """
         Retrieve a board by its ID.
         """
         user = await self.user_repository.get_user_by_email(email)
         if not user:
             raise ValueError("User not found.")
-        board = await self.board_repository.get_by_id(board_id, admin_id=user.id)
+        board = await self.board_repository.get_by_id(
+            board_id, admin_id=user.id, status=status, priority=priority
+        )
         return board
 
     async def create(self, board_data: BoardCreate, email: str) -> Board:

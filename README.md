@@ -44,7 +44,7 @@ Ensure you have the following installed on your system:
     openssl rand -hex 32
     ```
 
-````markdown
+
 6. **Build and Start the Docker Image**
     Run the following command to build the Docker image:
     ```bash
